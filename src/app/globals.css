@@ -1,1 +1,9 @@
 @import 'tailwindcss';
+
+@theme {
+	/* Add your theme styles here */
+}
+
+html {
+	font-family: 'Oswald', sans-serif;
+}
