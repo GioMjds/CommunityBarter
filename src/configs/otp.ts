@@ -55,7 +55,7 @@ export const otpStorage = {
 			data: {
 				hashedPassword: entry.hashedPassword,
 				firstName: entry.firstName,
-				lastNaWWme: entry.lastName,
+				lastName: entry.lastName,
 				username: entry.username,
 				age: entry.age,
 			},
