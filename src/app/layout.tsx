@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${oswald.variable} antialiased`}>
+            <body className={`${oswald.className} antialiased`}>
                 {children}
             </body>
         </html>
