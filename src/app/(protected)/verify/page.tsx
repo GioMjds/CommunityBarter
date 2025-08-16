@@ -1,6 +1,10 @@
+import { Metadata } from "next";
+import VerifyPage from "./verify";
+
+export const metadata: Metadata = {
+	title: "Verify your Registration OTP!"
+};
 
 export default function Verify() {
-	return (
-		<h1>Hello World</h1>
-	)
+	return <VerifyPage />;
 }

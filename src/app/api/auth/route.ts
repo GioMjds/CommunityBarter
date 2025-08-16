@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
                 }
 
                 const ageNum = Number(age);
-                
+
                 if (isNaN(ageNum) || (ageNum < 18 || ageNum > 90)) {
                     return NextResponse.json({
                         error: "Age must be a number between 18 and 90."
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
                 if (password !== confirmPassword) {
                     return NextResponse.json({
                         error: "Passwords do not match."
-                    }, { status: 200 });
+                    }, { status: 400 });
                 }
 
                 const existingUsername = await prisma.users.findUnique({
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
                 const otp = Math.floor(10000 + Math.random() * 90000).toString();
                 const hashedPassword = await hash(password, 10);
 
-                otpStorage.set(firstName, lastName, email, otp, hashedPassword, 5, username);
+                otpStorage.set(firstName, lastName, email, otp, hashedPassword, 5, username, ageNum);
 
                 await sendOtpEmail(email, otp);
 

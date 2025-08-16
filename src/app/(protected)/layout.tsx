@@ -9,7 +9,10 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-	title: 'Palitan Tayo!',
+	title: {
+		default: 'Palitan Tayo',
+		template: "%s - Palitan Tayo!"
+	},
 	description: 'An Online Platform for Bartering Goods and Services',
 };
 

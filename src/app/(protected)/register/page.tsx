@@ -1,6 +1,10 @@
+import { Metadata } from "next";
+import RegisterPage from "./register";
+
+export const metadata: Metadata = {
+	title: "Register"
+};
 
 export default function Register() {
-	return (
-		<h1>Hello World</h1>
-	)
+	return <RegisterPage />;
 }
