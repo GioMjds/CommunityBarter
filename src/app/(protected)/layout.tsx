@@ -1,10 +1,10 @@
 import '../globals.css';
 import type { Metadata } from 'next';
-import { Oswald } from 'next/font/google';
+import { Merriweather } from 'next/font/google';
 import Providers from '../providers';
 
-const oswald = Oswald({
-	variable: '--font-oswald',
+const merriweather = Merriweather({
+	variable: '--font-merriweather',
 	subsets: ['latin'],
 });
 
@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={`${oswald.variable} antialiased`}>
+			<body className={`${merriweather.variable} antialiased`}>
 				<Providers>{children}</Providers>
 			</body>
 		</html>
