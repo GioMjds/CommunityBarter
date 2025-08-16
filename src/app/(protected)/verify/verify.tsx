@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 
 export default function VerifyPage() {
 	const [otp, setOtp] = useState(Array(6).fill(''));
@@ -72,19 +73,41 @@ export default function VerifyPage() {
 	};
 
 	return (
-		<div className="flex items-center justify-center min-h-screen bg-dark-background">
-			<form
-				onSubmit={handleSubmit}
-				className="p-8 rounded-xl shadow-lg w-full max-w-md mx-4 bg-dark-muted text-dark-foreground"
-			>
-				<h1 className="text-2xl font-bold text-center mb-4">
-					Enter OTP
+		<div className="flex flex-col items-center justify-center min-h-screen bg-dark-background px-4">
+			{/* Logo */}
+			<div className="mb-4">
+				<Image
+					src="/Logo.png"
+					alt="Community Barter Logo"
+					width={80}
+					height={80}
+					className="bg-white rounded-full px-3 py-2"
+				/>
+			</div>
+
+			<div className="text-center mb-8">
+				<h1 className="text-3xl font-bold mt-4 text-primary-dark">
+					Verify OTP
 				</h1>
-				<p className="text-center text-dark-muted-foreground mb-6">
+				<p className="mt-2 text-dark-muted-foreground">
 					We sent a 6-digit code to your email
 				</p>
+			</div>
 
-				<div className="flex justify-between mb-6">
+			<form
+				onSubmit={handleSubmit}
+				className="p-8 rounded-xl shadow-lg w-full max-w-md bg-dark-muted border border-gray-700"
+			>
+				<div className="text-center mb-8">
+					<p className="mt-2 text-dark-muted-foreground">
+						We sent a 6-digit OTP to:
+					</p>
+					<p className=" font-bold mt-4 text-primary-dark">
+						adasdad@gmail.com
+					</p>
+				</div>
+
+				<div className="flex justify-between mb-8">
 					{otp.map((digit, index) => (
 						<input
 							key={index}
@@ -101,17 +124,24 @@ export default function VerifyPage() {
 							onKeyDown={(e) => handleKeyDown(e, index)}
 							onPaste={handlePaste}
 							onFocus={() => handleFocus(index)}
-							className="w-12 h-12 text-center rounded-lg border border-[#3B3B4B] bg-dark-muted focus:outline-none text-lg"
+							className="w-12 h-12 text-center  focus:ring-2 focus:ring-primary-dark text-dark-foreground rounded-lg border border-muted-foreground bg-dark-muted focus:outline-none text-lg"
 						/>
 					))}
 				</div>
 
-				<button
-					type="submit"
-					className="w-full py-3 px-4 rounded-lg font-medium bg-primary-dark text-dark-foreground"
-				>
+				<button className="w-full py-3 px-4 rounded-lg font-medium transition-all bg-primary-dark text-dark-foreground">
 					Verify
 				</button>
+
+				<div className="mt-4 text-center text-sm text-dark-muted-foreground">
+					Didn't receive the code?{' '}
+					<button
+						type="button"
+						className="text-primary-dark underline"
+					>
+						Resend OTP
+					</button>
+				</div>
 			</form>
 		</div>
 	);

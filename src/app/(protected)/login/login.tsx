@@ -38,7 +38,7 @@ export default function LoginPage() {
 		<div className="flex items-center justify-center min-h-screen bg-dark-background">
 			<form
 				onSubmit={handleSubmit}
-				className="p-8 rounded-xl shadow-lg w-full max-w-md mx-4 bg-dark-muted"
+				className="p-8 rounded-xl shadow-lg w-full max-w-md mx-4 bg-dark-muted  border border-gray-700"
 			>
 				<div className="text-center mb-8">
 					<h1 className="text-3xl font-bold mt-4 text-dark-foreground">
