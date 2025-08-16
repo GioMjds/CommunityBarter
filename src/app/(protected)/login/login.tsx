@@ -32,16 +32,16 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className="flex items-center justify-center min-h-screen bg-[#1E1E2F]">
+		<div className="flex items-center justify-center min-h-screen bg-dark-background">
 			<form
 				onSubmit={handleSubmit}
-				className="p-8 rounded-xl shadow-lg w-full max-w-md mx-4 bg-[#2A2A3B]"
+				className="p-8 rounded-xl shadow-lg w-full max-w-md mx-4 bg-dark-muted"
 			>
 				<div className="text-center mb-8">
-					<h1 className="text-3xl font-bold mt-4 text-[#E5E5E5]">
+					<h1 className="text-3xl font-bold mt-4 text-dark-foreground">
 						Welcome Back
 					</h1>
-					<p className="mt-2 text-[#A0A0B0]">
+					<p className="mt-2 text-dark-muted-foreground">
 						Please enter your credentials to login
 					</p>
 				</div>
@@ -51,14 +51,14 @@ export default function LoginPage() {
 						htmlFor={emailId}
 						className={`absolute left-3 transition-all duration-200 z-50 ${
 							isFocused.email || email
-								? '-top-3 text-xs px-1 translate-y-1 bg-[#2A2A3B] text-[#FF7A00]'
-								: 'top-3 left-12 text-[#A0A0B0]'
+								? '-top-3 text-xs px-1 translate-y-1 bg-dark-muted text-primary-dark'
+								: 'top-3 left-12 text-dark-muted-foreground'
 						}`}
 					>
 						Email Address
 					</label>
 					<div className="relative">
-						<User className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A0A0B0]" />
+						<User className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-muted-foreground" />
 						<input
 							id={emailId}
 							type="email"
@@ -66,7 +66,7 @@ export default function LoginPage() {
 							onChange={(e) => setEmail(e.target.value)}
 							onFocus={() => handleFocus('email')}
 							onBlur={() => handleBlur('email')}
-							className="w-full p-3 pl-12 rounded-lg focus:outline-none border border-[#3B3B4B] bg-[#2A2A3B] text-[#E5E5E5]"
+							className="w-full p-3 pl-12 rounded-lg focus:outline-none border border-[#3B3B4B] bg-dark-muted text-dark-foreground"
 							required
 						/>
 					</div>
@@ -77,14 +77,14 @@ export default function LoginPage() {
 						htmlFor={passwordId}
 						className={`absolute left-3 transition-all duration-200 z-50 ${
 							isFocused.password || password
-								? '-top-3 text-xs px-1 translate-y-1 bg-[#2A2A3B] text-[#FF7A00]'
-								: 'top-3 left-12 text-[#A0A0B0]'
+								? '-top-3 text-xs px-1 translate-y-1 bg-dark-muted text-primary-dark'
+								: 'top-3 left-12 text-dark-muted-foreground'
 						}`}
 					>
 						Password
 					</label>
 					<div className="relative">
-						<Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A0A0B0]" />
+						<Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-muted-foreground" />
 						<input
 							id={passwordId}
 							type="password"
@@ -92,19 +92,19 @@ export default function LoginPage() {
 							onChange={(e) => setPassword(e.target.value)}
 							onFocus={() => handleFocus('password')}
 							onBlur={() => handleBlur('password')}
-							className="w-full p-3 pl-12 rounded-lg focus:outline-none border border-[#3B3B4B] bg-[#2A2A3B] text-[#E5E5E5]"
+							className="w-full p-3 pl-12 rounded-lg focus:outline-none border border-[#3B3B4B] bg-dark-muted text-dark-foreground"
 							required
 						/>
 					</div>
 				</div>
 
-				<button className="w-full py-3 px-4 rounded-lg font-medium transition-all bg-[#FF7A00] text-[#E5E5E5]">
+				<button className="w-full py-3 px-4 rounded-lg font-medium transition-all bg-primary-dark text-dark-foreground">
 					Login
 				</button>
 
-				<div className="mt-6 text-center text-sm text-[#A0A0B0]">
+				<div className="mt-6 text-center text-sm text-dark-muted-foreground">
 					Don't have an account?{' '}
-					<a className="text-[#FF7A00] underline" href="#">
+					<a className="text-primary-dark underline" href="#">
 						Sign up
 					</a>
 				</div>
