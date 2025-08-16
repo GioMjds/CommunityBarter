@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
-@theme {
+:root {
+	--color-primary-dark: #ff7a00;
+	--color-dark-background: #1e1e2f;
+	--color-dark-foreground: #e5e5e5;
+	--color-dark-muted: #2a2a3b;
+	--color-dark-muted-foreground: #a0a0b0;
 	/* Add your theme styles here */
 }
 
