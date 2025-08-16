@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import cloudinary from "@/lib/cloudinary";
 import { compare, hash } from "bcrypt";
+import { sendOtpEmail } from "@/configs/email";
 
 export async function POST(req: NextRequest) {
     try {
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
                 }
 
                 const response = NextResponse.json({
-                    message: `User ${user.email} logged in.`,
+                    message: `User ${user.name} logged in.`,
                     user: {
                         id: user.id,
                         email: user.email,
@@ -123,6 +124,7 @@ export async function POST(req: NextRequest) {
                 }
 
                 const ageNum = Number(age);
+                
                 if (isNaN(ageNum) || (ageNum < 18 || ageNum > 90)) {
                     return NextResponse.json({
                         error: "Age must be a number between 18 and 90."
@@ -148,15 +150,93 @@ export async function POST(req: NextRequest) {
                 const otp = Math.floor(10000 + Math.random() * 90000).toString();
                 const hashedPassword = await hash(password, 10);
 
-                otpStorage.set(firstName, lastName, email, otp, hashedPassword);
+                otpStorage.set(firstName, lastName, email, otp, hashedPassword, 5, username);
+
+                await sendOtpEmail(email, otp);
 
                 return NextResponse.json({
                     message: "OTP sent to your email",
+                    firstName: firstName,
+                    lastName: lastName,
+                    username: username,
+                    age: ageNum,
                     otp: otp
                 }, { status: 200 });
             }
             case "verify_otp": {
+                const { email, otp } = await req.json();
 
+                const validation = otpStorage.validate(email, otp);
+
+                if (!validation.valid) {
+                    return NextResponse.json({
+                        error: validation.error
+                    }, { status: 400 });
+                }
+
+                const hashedPassword = validation.data?.hashedPassword;
+                const firstName = validation.data?.firstName;
+                const lastName = validation.data?.lastName;
+                const username = validation.data?.username;
+                const age = validation.data?.age;
+
+                if (!hashedPassword || !username) {
+                    return NextResponse.json({
+                        error: "No hashed password found in this email."
+                    }, { status: 400 });
+                }
+
+                let profileImageUrl: string = "";
+
+                try {
+                    const defaultPath = path.join(
+                        process.cwd(),
+                        "public",
+                        "Default_pfp.jpg"
+                    );
+                    const imageBuffer = fs.readFileSync(defaultPath);
+                    const base64Items = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
+                    
+                    const uploadResponse = await cloudinary.uploader.upload(
+                        base64Items,
+                        {
+                            folder: "palitantayo/profiles",
+                            public_id: `user-${email.replace(/[^a-zA-Z0-9]/g, "_")}`,
+                            overwrite: true,
+                            resource_type: "image"
+                        }
+                    );
+
+                    profileImageUrl = uploadResponse.secure_url;
+                } catch (error) {
+                    console.error(`Error uploading profile image: ${error}`);
+                }
+
+                const newUser = await prisma.users.create({
+                    data: {
+                        id: crypto.randomUUID(),
+                        name: `${firstName} ${lastName}`,
+                        email: email,
+                        password: hashedPassword,
+                        username: username,
+                        age: age,
+                        profileImage: profileImageUrl
+                    }
+                });
+
+                otpStorage.delete(email);
+
+                return NextResponse.json({
+                    message: `User ${username} created successfully`,
+                    user: {
+                        id: newUser.id,
+                        email: newUser.email,
+                        name: newUser.name,
+                        username: newUser.username,
+                        age: newUser.age,
+                        profileImage: newUser.profileImage
+                    }
+                }, { status: 201 });
             }
             default: {
                 return NextResponse.json({

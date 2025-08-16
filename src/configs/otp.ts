@@ -3,6 +3,8 @@ interface OtpCacheEntry {
     hashedPassword: string;
     firstName: string;
     lastName: string;
+    age?: number;
+    username?: string;
     expiresAt: Date;
 }
 
@@ -18,9 +20,18 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 export const otpStorage = {
-    set: (firstName: string, lastName: string, email: string, otp: string, hashedPassword: string, ttlMinutes = 5) => {
+    set: (
+        firstName: string, 
+        lastName: string, 
+        email: string, 
+        otp: string, 
+        hashedPassword: string, 
+        ttlMinutes = 5, 
+        username?: string, 
+        age?: number
+    ) => {
         const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000);
-        otpCache.set(email, { otp, hashedPassword, firstName, lastName, expiresAt });
+        otpCache.set(email, { otp, hashedPassword, firstName, lastName, username, age, expiresAt });
     },
     get: (email: string) => otpCache.get(email),
     delete: (email: string) => otpCache.delete(email),
@@ -29,6 +40,15 @@ export const otpStorage = {
         if (!entry) return { valid: false, error: "OTP not found" };
         if (entry.otp !== userOtp) return { valid: false, error: "Invalid OTP" };
         if (new Date() > entry.expiresAt) return { valid: false, error: "OTP expired" };
-        return { valid: true, data: { hashedPassword: entry.hashedPassword, firstName: entry.firstName, lastName: entry.lastName } };
+        return { 
+            valid: true, 
+            data: {
+                hashedPassword: entry.hashedPassword,
+                firstName: entry.firstName,
+                lastName: entry.lastName,
+                username: entry.username,
+                age: entry.age
+            }
+        };
     }
 };

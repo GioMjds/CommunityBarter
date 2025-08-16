@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
 
-
 export async function sendOtpEmail(email: string, otp: string) {
     const transporter = nodemailer.createTransport({
         service: "gmail",
@@ -14,7 +13,8 @@ export async function sendOtpEmail(email: string, otp: string) {
     })
     
     const htmlTemplate = `
-    
+        <h1>Your OTP Code</h1>
+        <p>Your OTP code is <strong>${otp}</strong></p>
     `;
 
     const mailOptions = {
@@ -23,7 +23,7 @@ export async function sendOtpEmail(email: string, otp: string) {
         subject: "Your Verification Code - Community Barter",
         html: htmlTemplate,
         text: `
-        
+        Your OTP code is ${otp}
         `,
     }
 

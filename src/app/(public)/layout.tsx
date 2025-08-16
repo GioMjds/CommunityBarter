@@ -2,6 +2,8 @@ import '../globals.css';
 import type { Metadata } from 'next';
 import { Oswald } from 'next/font/google';
 import Providers from '../providers';
+import Navbar from '@/layouts/Navbar';
+import Footer from '@/layouts/Footer';
 
 const oswald = Oswald({
 	variable: '--font-oswald',
@@ -21,7 +23,11 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${oswald.variable} antialiased`}>
-				<Providers>{children}</Providers>
+				<Providers>
+					<Navbar />
+					{children}
+					<Footer />
+				</Providers>
 			</body>
 		</html>
 	);
