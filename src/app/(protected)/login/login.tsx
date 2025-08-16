@@ -2,6 +2,7 @@
 
 import { useState, useId } from 'react';
 import { User, Lock } from 'lucide-react';
+import Link from 'next/link';
 
 type Field = 'email' | 'password';
 
@@ -15,6 +16,8 @@ export default function LoginPage() {
 
 	const emailId = useId();
 	const passwordId = useId();
+
+	console.log(emailId);
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -103,10 +106,12 @@ export default function LoginPage() {
 				</button>
 
 				<div className="mt-6 text-center text-sm text-dark-muted-foreground">
-					Don't have an account?{' '}
-					<a className="text-primary-dark underline" href="#">
-						Sign up
-					</a>
+					Don't have an account?
+					<Link href="/register">
+						<span className="text-primary-dark underline">
+							Sign up
+						</span>
+					</Link>
 				</div>
 			</form>
 		</div>
