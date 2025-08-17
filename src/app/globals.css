@@ -1,14 +1,15 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-:root {
-	--color-primary-dark: #ff7a00;
-	--color-dark-background: #1e1e2f;
-	--color-dark-foreground: #e5e5e5;
-	--color-dark-muted: #2a2a3b;
-	--color-dark-muted-foreground: #a0a0b0;
+@theme {
 	/* Add your theme styles here */
 }
 
-html {
-	font-family: 'Oswald', sans-serif;
+	html {
+		font-family: 'Oswald', sans-serif;
+		@apply bg-background text-foreground;
+	}
+}
+
+@layer utilities {
+	/* Custom utilities if needed */
 }
