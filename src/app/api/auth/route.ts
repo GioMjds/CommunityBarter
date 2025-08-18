@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
                 return response;
             }
             case "send_register_otp": { // /register page.tsx -> for email verification in register/page.tsx
-                const { firstName, lastName, email, age, username, password, confirmPassword } = await req.json();
+                const { firstName, lastName, email, password, confirmPassword } = await req.json();
             
                 if (!firstName || !lastName) {
                     return NextResponse.json({
@@ -117,17 +117,9 @@ export async function POST(req: NextRequest) {
                     }, { status: 400 });
                 }
 
-                if (!email || !age || !username || !password || !confirmPassword) {
+                if (!email || !password || !confirmPassword) {
                     return NextResponse.json({
                         error: "All fields are required."
-                    }, { status: 400 });
-                }
-
-                const ageNum = Number(age);
-
-                if (isNaN(ageNum) || (ageNum < 18 || ageNum > 90)) {
-                    return NextResponse.json({
-                        error: "Age must be a number between 18 and 90."
                     }, { status: 400 });
                 }
 
@@ -137,20 +129,10 @@ export async function POST(req: NextRequest) {
                     }, { status: 400 });
                 }
 
-                const existingUsername = await prisma.users.findUnique({
-                    where: { username: username }
-                });
-
-                if (existingUsername) {
-                    return NextResponse.json({
-                        error: "Username already exists."
-                    }, { status: 400 });
-                }
-
                 const otp = Math.floor(10000 + Math.random() * 90000).toString();
                 const hashedPassword = await hash(password, 10);
 
-                otpStorage.set(firstName, lastName, email, otp, hashedPassword, 5, username, ageNum);
+                otpStorage.set(firstName, lastName, email, otp, hashedPassword, 5);
 
                 await sendOtpEmail(email, otp);
 
@@ -158,8 +140,6 @@ export async function POST(req: NextRequest) {
                     message: "OTP sent to your email",
                     firstName: firstName,
                     lastName: lastName,
-                    username: username,
-                    age: ageNum,
                     otp: otp
                 }, { status: 200 });
             }
@@ -177,12 +157,81 @@ export async function POST(req: NextRequest) {
                 const hashedPassword = validation.data?.hashedPassword;
                 const firstName = validation.data?.firstName;
                 const lastName = validation.data?.lastName;
-                const username = validation.data?.username;
-                const age = validation.data?.age;
 
-                if (!hashedPassword || !username) {
+                if (!hashedPassword) {
                     return NextResponse.json({
                         error: "No hashed password found in this email."
+                    }, { status: 400 });
+                }
+
+                return NextResponse.json({
+                    message: "OTP verified successfully",
+                    user: {
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        password: hashedPassword
+                    }
+                }, { status: 201 });
+            }
+            case "resend_otp": {
+                const { firstName, lastName, email } = await req.json();
+            
+                if (!email) {
+                    return NextResponse.json({
+                        error: "Email is required"
+                    }, { status: 200 });
+                }
+
+                const otpData = otpStorage.get(email);
+
+                if (!otpData) {
+                    return NextResponse.json({
+                        error: "No OTP found for this email"
+                    }, { status: 400 });
+                }
+
+                const newOtp = Math.floor(10000 + Math.random() * 90000).toString();
+                otpStorage.set(firstName, lastName, email, newOtp, otpData.hashedPassword);
+
+                await sendOtpEmail(email, newOtp);
+
+                return NextResponse.json({
+                    message: "OTP resent successfully"
+                }, { status: 200 });
+            }
+            case 'complete_profile': {
+                const { firstName, lastName, email, hashedPassword, age, username, contactNumber } = await req.json();
+            
+                if (!username || !age || !contactNumber) {
+                    return NextResponse.json({
+                        error: "All fields are required"
+                    }, { status: 400 });
+                }
+
+                const ageNum = Number(age);
+
+                if (isNaN(ageNum)) {
+                    return NextResponse.json({
+                        error: "Age must be a number"
+                    }, { status: 400 });
+                }
+
+                const existingUsername = await prisma.users.findFirst({
+                    where: { username: username }
+                });
+
+                if (existingUsername) {
+                    return NextResponse.json({
+                        error: "Username already exists"
+                    }, { status: 400 });
+                }
+
+                const contactRegex = /^[0-9]{10,15}$/;
+
+                if (!contactRegex.test(contactNumber)) {
+                    return NextResponse.json({
+                        error: "Contact number must be between 10 to 15 digits"
                     }, { status: 400 });
                 }
 
@@ -219,24 +268,54 @@ export async function POST(req: NextRequest) {
                         email: email,
                         password: hashedPassword,
                         username: username,
-                        age: age,
+                        age: ageNum,
+                        contact_number: contactNumber,
                         profileImage: profileImageUrl
                     }
                 });
 
-                otpStorage.delete(email);
+                const session = await createSession(newUser.id);
 
-                return NextResponse.json({
-                    message: `User ${username} created successfully`,
+                if (!session) {
+                    return NextResponse.json({
+                        error: "Failed to create session"
+                    }, { status: 500 });
+                }
+
+                const response = NextResponse.json({
+                    message: `User ${newUser.name} registered successfully.`,
                     user: {
                         id: newUser.id,
-                        email: newUser.email,
                         name: newUser.name,
+                        email: newUser.email,
                         username: newUser.username,
                         age: newUser.age,
+                        contact_number: newUser.contact_number,
                         profileImage: newUser.profileImage
                     }
                 }, { status: 201 });
+
+                response.cookies.set({
+                    name: "access_token",
+                    value: session.accessToken,
+                    httpOnly: true,
+                    secure: false,
+                    sameSite: "lax",
+                    path: "/",
+                    maxAge: 60 * 60 * 24,
+                });
+
+                response.cookies.set({
+                    name: "refresh_token",
+                    value: session.refreshToken,
+                    httpOnly: true,
+                    secure: false,
+                    sameSite: "lax",
+                    path: "/",
+                    maxAge: 60 * 60 * 24 * 30,
+                });
+
+                return response;
             }
             default: {
                 return NextResponse.json({
