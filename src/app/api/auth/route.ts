@@ -140,6 +140,7 @@ export async function POST(req: NextRequest) {
                     message: "OTP sent to your email",
                     firstName: firstName,
                     lastName: lastName,
+                    email: email,
                     otp: otp
                 }, { status: 200 });
             }

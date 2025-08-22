@@ -9,6 +9,14 @@ import { useMutation } from '@tanstack/react-query';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+interface RegisterOtpResponse {
+	message: string;
+	firstName: string;
+	lastName: string;
+	email: string;
+	otp: string;
+}
+
 type Field = 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword';
 
 type FormData = {
@@ -54,8 +62,8 @@ export default function RegisterPage() {
 	const confirmPasswordValue = watch('confirmPassword');
 
 	const registerMutation = useMutation({
-		mutationFn: async (formData: FormData) => {
-			return await POST({
+		mutationFn: async (formData: FormData): Promise<RegisterOtpResponse> => {
+			return await POST<RegisterOtpResponse>({
 				url: '/auth?action=send_register_otp',
 				data: {
 					firstName: formData.firstName,
@@ -72,7 +80,7 @@ export default function RegisterPage() {
 		onSuccess: (response) => {
 			if (response) {
 				if (typeof window !== 'undefined') {
-					localStorage.setItem('register_email', response);
+					localStorage.setItem('register_email', response.email);
 				}
 				router.push(`/verify`);
 			}
