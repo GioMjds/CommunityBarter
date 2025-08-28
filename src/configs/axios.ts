@@ -15,9 +15,7 @@ interface ParamsWithData extends ApiParams {
 }
 
 const baseConfig: AxiosRequestConfig = {
-	headers: {
-		'Content-Type': 'application/json',
-	},
+	headers: { 'Content-Type': 'application/json' },
 	withCredentials: true,
 };
 
@@ -37,7 +35,10 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
 	(response: AxiosResponse) => response.data,
-	(error) => Promise.reject(error)
+	(error) => {
+		const errorMessage = error.response?.data?.error;
+		return Promise.reject(errorMessage);
+	}
 );
 
 /**

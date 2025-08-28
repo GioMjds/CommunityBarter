@@ -13,16 +13,185 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Users {
-    id           String   @id @default(cuid())
-    email        String   @unique
-    name         String
-    username     String   @unique
-    age          Int?
-    password     String
-    profileImage String?
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+// Enums
+enum Condition {
+    NEW       @map("new")
+    LIKE_NEW  @map("like_new")
+    GOOD      @map("good")
+    FAIR      @map("fair")
+    POOR      @map("poor")
+}
 
+enum ItemStatus {
+    AVAILABLE @map("available")
+    PENDING   @map("pending")
+    TRADED    @map("traded")
+    WITHDRAWN @map("withdrawn")
+}
+
+enum TradeStatus {
+    PROPOSED    @map("proposed") // -> A user has sent swap request, awaiting the recipient's response
+    WITHDRAWN   @map("withdrawn") // -> The proposer has cancelled the trade request before it was accepted or rejected 
+    REJECTED    @map("rejected") // -> The recipient has declined the proposal request
+    ACCEPTED    @map("accepted") // -> Both parties have agreed to the swap terms, ready to schedule trades
+    IN_PROGRESS @map("in_progress") // -> The items are currently in transit or being engaged in person
+    COMPLETED   @map("completed") // -> The physical exchange has been confirmed by both parties
+    RATED       @map("rated") // -> (Optional): The user has rated the trade
+}
+
+model Users {
+    id              String   @id @default(cuid())
+    email           String   @unique
+    name            String
+    username        String   @unique
+    age             Int?
+    password        String
+    contact_number  String?  @map("contact_number")
+    profileImage    String?  @map("profile_image")
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    // Relations
+    ownedItems      Items[]   @relation("UserItems")
+    requestedTrades Trades[]  @relation("TradeRequester")
+    ownedTrades     Trades[]  @relation("TradeOwner")
+    sentMessages    Messages[] @relation("MessageSender")
+    receivedMessages Messages[] @relation("MessageReceiver")
+    givenReviews    Reviews[] @relation("ReviewGiver")
+    receivedReviews Reviews[] @relation("ReviewReceiver")
+
+    // Constraints and indexes
     @@map("users")
+    @@index([email], name: "idx_users_email")
+    @@index([username], name: "idx_users_username") 
+    @@index([createdAt], name: "idx_users_created_at")
+}
+
+model Categories {
+    id          Int      @id @default(autoincrement())
+    name        String   @unique
+    description String?
+    createdAt   DateTime @default(now())
+
+    items Items[]
+
+    @@map("categories")
+    @@index([name], name: "idx_categories_name")
+}
+
+model Items {
+    id             String      @id @default(cuid())
+    userId         String      @map("user_id")
+    categoryId     Int         @map("category_id")
+    title          String      @db.VarChar(255)
+    description    String      
+    estimatedValue Decimal?    @map("estimated_value") @db.Decimal(10, 2)
+    conditionType  Condition   @map("condition_type")
+    status         ItemStatus  @default(AVAILABLE)
+    createdAt      DateTime    @default(now()) @map("created_at")
+    updatedAt      DateTime    @updatedAt @map("updated_at")
+
+    // Relations
+    user            Users         @relation("UserItems", fields: [userId], references: [id], onDelete: Cascade)
+    category        Categories    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+    images          ItemImages[]
+    requestedTrades Trades[]      @relation("TradeRequesterItem")
+    ownerTrades     Trades[]      @relation("TradeOwnerItem")
+
+    @@map("items")
+    @@index([userId], name: "idx_items_user_id")
+    @@index([categoryId], name: "idx_items_category_id")
+    @@index([status], name: "idx_items_status")
+    @@index([conditionType], name: "idx_items_condition")
+    @@index([createdAt], name: "idx_items_created_at")
+}
+
+model ItemImages {
+    id                 String   @id @default(cuid())
+    itemId             String   @map("item_id")
+    cloudinaryUrl      String   @map("cloudinary_url") @db.Text
+    cloudinaryPublicId String   @map("cloudinary_public_id") @db.VarChar(255)
+    displayOrder       Int      @default(0) @map("display_order")
+    isPrimary          Boolean  @default(false) @map("is_primary")
+    createdAt          DateTime @default(now()) @map("created_at")
+
+    // Relations
+    item Items @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+    @@map("item_images")
+    @@unique([itemId, isPrimary], name: "uk_item_primary_image")
+    @@index([itemId], name: "idx_item_images_item_id")
+    @@index([itemId, displayOrder], name: "idx_item_images_order")
+    @@index([itemId, isPrimary], name: "idx_item_images_primary")
+    @@index([cloudinaryPublicId], name: "idx_item_images_cloudinary_public_id")
+}
+
+model Trades {
+    id              String      @id @default(cuid())
+    requesterId     String      @map("requester_id")
+    ownerId         String      @map("owner_id")
+    requesterItemId String      @map("requester_item_id")
+    ownerItemId     String      @map("owner_item_id")
+    status          TradeStatus @default(PROPOSED)
+    notes           String?     @db.Text
+    proposedAt      DateTime    @default(now()) @map("proposed_at")
+    acceptedAt      DateTime?   @map("accepted_at")
+    completedAt     DateTime?   @map("completed_at")
+    cancelledAt     DateTime?   @map("cancelled_at")
+
+    // Relations
+    requester     Users     @relation("TradeRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+    owner         Users     @relation("TradeOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+    requesterItem Items     @relation("TradeRequesterItem", fields: [requesterItemId], references: [id], onDelete: Cascade)
+    ownerItem     Items     @relation("TradeOwnerItem", fields: [ownerItemId], references: [id], onDelete: Cascade)
+    reviews       Reviews[]
+    messages      Messages[]
+
+    @@map("trades")
+    @@index([requesterId], name: "idx_trades_requester")
+    @@index([ownerId], name: "idx_trades_owner")
+    @@index([status], name: "idx_trades_status")
+    @@index([proposedAt], name: "idx_trades_proposed_at")
+    @@index([requesterItemId, ownerItemId], name: "idx_trades_items")
+}
+
+model Reviews {
+    id         String   @id @default(cuid())
+    tradeId    String   @map("trade_id")
+    reviewerId String   @map("reviewer_id")
+    revieweeId String   @map("reviewee_id")
+    rating     Int      @db.Int
+    comment    String?  @db.Text
+    createdAt  DateTime @default(now()) @map("created_at")
+
+    // Relations
+    trade    Trades @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+    reviewer Users  @relation("ReviewGiver", fields: [reviewerId], references: [id], onDelete: Cascade)
+    reviewee Users  @relation("ReviewReceiver", fields: [revieweeId], references: [id], onDelete: Cascade)
+
+    @@map("reviews")
+    @@unique([tradeId, reviewerId], name: "uk_trade_reviewer")
+    @@index([revieweeId], name: "idx_reviews_reviewee")
+    @@index([rating], name: "idx_reviews_rating")
+    @@index([createdAt], name: "idx_reviews_created_at")
+}
+
+model Messages {
+    id         String   @id @default(cuid())
+    tradeId    String   @map("trade_id")
+    senderId   String   @map("sender_id")
+    receiverId String   @map("receiver_id")
+    content    String   @db.Text
+    isRead     Boolean  @default(false) @map("is_read")
+    createdAt  DateTime @default(now()) @map("created_at")
+
+    // Relations
+    trade    Trades @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+    sender   Users  @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+    receiver Users  @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+    @@map("messages")
+    @@index([tradeId], name: "idx_messages_trade")
+    @@index([receiverId, isRead], name: "idx_messages_receiver_unread")
+    @@index([createdAt], name: "idx_messages_created_at")
 }
