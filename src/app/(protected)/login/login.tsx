@@ -1,10 +1,10 @@
 'use client';
 
+import { useState } from 'react';
+import { User, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { POST } from '@/configs/axios';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { User, Lock } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -151,6 +151,7 @@ export default function LoginPage() {
                             className="w-full p-3 pl-12 rounded-lg focus:outline-none border border-[#3B3B4B] bg-dark-muted text-dark-foreground"
                         />
 						<motion.button
+                            type="button"
 							whileHover={{ scale: 1.05 }}
 							whileTap={{ scale: 0.9 }}
 							className='absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-dark-muted-foreground'

@@ -1,65 +1,8 @@
 @import 'tailwindcss';
 
 @theme {
-	/* Color palette - hex values */
-	--color-primary: #78b9b5;
-	--color-primary-dark: #ff7a00;
-	--color-secondary: #065084;
-	--color-accent: #320a6b;
-
-	/* Light mode colors */
-	--color-background: #ffffff;
-	--color-foreground: #0a0a0a;
-	--color-muted: #f5f5f5;
-	--color-muted-foreground: #646464;
-
-	/* Dark mode colors */
-	--color-dark-background: #1e1e2f;
-	--color-dark-foreground: #e5e5e5;
-	--color-dark-muted: #2a2a3b;
-	--color-dark-muted-foreground: #a0a0b0;
+	/* Add your theme styles here */
 }
-
-@layer base {
-	:root {
-		/* Light mode - using hex directly */
-		--background: var(--color-background);
-		--foreground: var(--color-foreground);
-		--muted: var(--color-muted);
-		--muted-foreground: var(--color-muted-foreground);
-
-		--primary: var(--color-primary);
-		--primary-foreground: #ffffff;
-
-		--secondary: var(--color-secondary);
-		--secondary-foreground: #ffffff;
-
-		--accent: var(--color-accent);
-		--accent-foreground: #ffffff;
-
-		--destructive: #dc2626;
-		--destructive-foreground: #ffffff;
-	}
-
-	.dark {
-		/* Dark mode - using hex directly */
-		--background: var(--color-dark-background);
-		--foreground: var(--color-dark-foreground);
-		--muted: var(--color-dark-muted);
-		--muted-foreground: var(--color-dark-muted-foreground);
-
-		--primary: var(--color-primary-dark);
-		--primary-foreground: #ffffff;
-
-		--secondary: var(--color-secondary);
-		--secondary-foreground: #ffffff;
-
-		--accent: var(--color-accent);
-		--accent-foreground: #ffffff;
-
-		--destructive: #dc2626;
-		--destructive-foreground: #ffffff;
-	}
 
 	html {
 		font-family: 'Oswald', sans-serif;
